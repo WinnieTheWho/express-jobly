@@ -12,8 +12,8 @@ CREATE TABLE jobs (
   title text NOT NULL, 
   salary FLOAT NOT NULL, 
   equity FLOAT NOT NULL ,
-  company_handle text NOT NULL REFERENCES companies,
-  date_posted timestamp with time zone,
+  company_handle text NOT NULL REFERENCES companies ON DELETE CASCADE,
+  date_posted timestamp with time zone NOT NULL,
   constraint check_equity
     check (equity between 0 and 1)
 );

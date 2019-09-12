@@ -1,4 +1,4 @@
-/** Message class for jobly */
+/** Company class for jobly */
 
 const db = require("../db");
 const ExpressError = require("../helpers/expressError");
