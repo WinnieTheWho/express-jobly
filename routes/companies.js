@@ -1,10 +1,15 @@
-const Router = require("express").Router;
 const express = require('express');
-// const User = require('../models/user');
+const { Router } = express;
+const jsonschema = require("jsonschema");
+const ExpressError = require("../helpers/expressError");
 const Companies = require("../models/companies");
+const companySchema = require("../schemas/companiesSchema");
+
 
 const router = new Router();
 
+
+/** GET / => list of companies */
 router.get("/", async function (req, res, next) {
   try {
     const companies = await Companies.getAllCompanies(req.query);
@@ -15,43 +20,56 @@ router.get("/", async function (req, res, next) {
   }
 });
 
+/**  POST / => creates new company  */
 router.post("/", async function (req, res, next) {
-  try {
-    const { handle, name, num_employees, description, logo_url } = req.body;
-    const company = await Companies.createCompany({ handle, name, num_employees, description, logo_url });
+  const result = jsonschema.validate(req.body, companySchema);
 
-    return res.json(company)
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(error => error.stack);
+    let error = new ExpressError(listOfErrors, 400);
+    return next(error);
   }
-  catch (err) {
-    return next(err);
-  }
+
+  const { handle, name, num_employees, description, logo_url } = req.body.company;
+  const company = await Companies.createCompany({ handle, name, num_employees, description, logo_url });
+
+  return res.json({ company }, 201);
+
 });
 
+/** GET /:id => details of one company */
 router.get("/:id", async function (req, res, next) {
   try {
     const { id } = req.params;
     const company = await Companies.getCompany(id);
 
-    return res.json(company)
+    return res.json({ company })
   }
   catch (err) {
     return next(err);
   }
 });
 
+/** PATCH /:id => update details of one company */
 router.patch("/:id", async function (req, res, next) {
-  try {
-    const { id } = req.params;
-    const { name, num_employees, description, logo_url } = req.body;
-    const company = await Companies.updateCompany(id, name, num_employees, description, logo_url);
+  const result = jsonschema.validate(req.body, companySchema)
 
-    return res.json(company)
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(error => error.stack);
+    let error = new ExpressError(listOfErrors, 400);
+    return next(error);
   }
-  catch (err) {
-    return next(err);
-  }
+
+  const { id } = req.params;
+  const { name, num_employees, description, logo_url } = req.body.company;
+  //TODO: MAKE INPUT INTO OBJECT 
+  const company = await Companies.updateCompany(id, name, num_employees, description, logo_url);
+
+  return res.json({ company })
+
 });
 
+/** DELETE /:id => delete one company from database */
 router.delete("/:id", async function (req, res, next) {
   try {
     const { id } = req.params;

@@ -1,7 +1,7 @@
 /** Message class for jobly */
 
 const db = require("../db");
-const ExpressError = require("../expressError");
+const ExpressError = require("../helpers/expressError");
 
 
 /** companies */
@@ -13,6 +13,7 @@ class Companies {
     let min = Number(queryDataObj.min_employees);
     let max = Number(queryDataObj.max_employees);
     let search = queryDataObj.search;
+    //TODO: MAKE ARRAY FOR SQL QUERY SEARCH 
     let values = [];
 
     if (queryDataObj) {
@@ -27,19 +28,19 @@ class Companies {
 
       if (max) {
         values.push(max);
-        if(values.length === 1) {
-          querySearch += ` WHERE name LIKE $1`
+        if (values.length === 1) {
+          querySearch += ` WHERE num_employees <= $1`
         } else {
-        querySearch += ` AND num_employees <= $${values.length}`
+          querySearch += ` AND num_employees < $${values.length}`
         }
       }
 
       if (search) {
         values.push(search);
-        if(values.length === 1) {
+        if (values.length === 1) {
           querySearch += ` WHERE name LIKE $1`
         } else {
-        querySearch += ` AND name LIKE $${values.length}`
+          querySearch += ` AND name LIKE $${values.length}`
         }
       }
       const result = await db.query(querySearch, values)
@@ -49,9 +50,6 @@ class Companies {
       return result.rows;
     } else {
       const result = await db.query(querySearch)
-      if (result.rowCount === 0) {
-        throw new ExpressError(`No results were found`)
-      }
       return result.rows;
     }
   }
@@ -113,7 +111,6 @@ class Companies {
       throw new ExpressError(`No such company found: ${id}`, 404);
     }
 
-    console.log("RESULT DELETED:", result.rows[0])
     return result.rows[0].name;
   }
 }
