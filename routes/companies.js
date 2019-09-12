@@ -7,20 +7,13 @@ const router = new Router();
 
 router.get("/", async function (req, res, next) {
   try {
-    let companies;
-    if (req.query) {
-      companies = await Companies.getAllCompanies(req.query)
-      return res.json({ companies });
-    }
-    else {
-      companies = await Companies.getAllCompanies();
-      return res.json({ companies });
-    }
+    const companies = await Companies.getAllCompanies(req.query);
+    return res.json({ companies });
   }
   catch (err) {
-      return next(err);
-    }
-  });
+    return next(err);
+  }
+});
 
 router.post("/", async function (req, res, next) {
   try {

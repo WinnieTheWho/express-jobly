@@ -8,35 +8,52 @@ const ExpressError = require("../expressError");
 
 class Companies {
 
-  static async getAllCompanies(queryObj) {
-    let result;
+  static async getAllCompanies(queryDataObj) {
+    let querySearch = `SELECT handle, name FROM companies`;
+    let min = Number(queryDataObj.min_employees);
+    let max = Number(queryDataObj.max_employees);
+    let search = queryDataObj.search;
+    let values = [];
 
-    if (queryObj) {
-      let min = Number(queryObj.min);
-      let max = Number(queryObj.max);
-      let name = queryObj.search;
-
+    if (queryDataObj) {
       if (min > max) {
-        throw new ExpressError(`Minimum number of empoloyees can not be greater than maximum number of employees`, 400);
+        throw new ExpressError(`Minimum number of empoloyees must be greater than maximum number of employees`, 400);
       }
 
-      if (queryObj.search && queryObj.min && queryObj.max) {
-        result = await db.query(
-          `SELECT name, handle FROM companies
-           JOIN jobs  
-           WHERE num_employees > $1 
-           AND num_employees < $2
-            AND name = $3`, [min, max, name]);
-      } else {
-        result = await db.query(
-          `SELECT handle, name FROM companies`
-        );
+      if (min) {
+        values.push(min);
+        querySearch += ` WHERE num_employees >= $${values.length}`
       }
 
-      let companies = result.rows;
-      return companies;
+      if (max) {
+        values.push(max);
+        if(values.length === 1) {
+          querySearch += ` WHERE name LIKE $1`
+        } else {
+        querySearch += ` AND num_employees <= $${values.length}`
+        }
+      }
+
+      if (search) {
+        values.push(search);
+        if(values.length === 1) {
+          querySearch += ` WHERE name LIKE $1`
+        } else {
+        querySearch += ` AND name LIKE $${values.length}`
+        }
+      }
+      const result = await db.query(querySearch, values)
+      if (result.rowCount === 0) {
+        throw new ExpressError(`No results were found`)
+      }
+      return result.rows;
+    } else {
+      const result = await db.query(querySearch)
+      if (result.rowCount === 0) {
+        throw new ExpressError(`No results were found`)
+      }
+      return result.rows;
     }
-
   }
 
   static async createCompany({ handle, name, num_employees, description, logo_url }) {
@@ -88,8 +105,8 @@ class Companies {
   static async deleteCompany(id) {
     const result = await db.query(
       `DELETE FROM companies
-      WHERE handle = $1
-      RETURNING name`, [id]
+        WHERE handle = $1
+        RETURNING name`, [id]
     );
 
     if (!result.rows[0]) {
