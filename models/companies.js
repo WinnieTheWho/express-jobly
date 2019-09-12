@@ -10,51 +10,28 @@ class Companies {
 
   static async getAllCompanies(queryObj) {
     let result;
-    let select;
-    let join;
-    let where;
 
     if (queryObj) {
-      // console.log("OBJECT VALUES:", queryObj.search, queryObj.min, queryObj.max )
-      if (queryObj.search && queryObj.min && queryObj.max) {
+      let min = Number(queryObj.min);
+      let max = Number(queryObj.max);
+      let name = queryObj.search;
 
-        // select = "name";
-        // join = "JOIN jobs ON companies.handle = jobs.company_handle";
-        // where = `companies.num_employees > $1 AND companies.num_employees < $2`
-        // let queryString = `SELECT handle, ${select} FROM companies ${join} WHERE ${where}`;
-        // console.log("QUERY STRING:", queryString)
-        // result = await db.query(queryString, [queryObj.min, queryObj.max])
-        result = await db.query(
-          `SELECT name, handle FROM companies
-                    WHERE companies.num_employees > ${Number(queryObj.min)} AND companies.num_employees < ${Number(queryObj.max)}`
-        );
+      if (min > max) {
+        throw new ExpressError(`Minimum number of empoloyees can not be greater than maximum number of employees`, 400);
       }
 
-      // if (queryObj === search) {
-      //     result = await db.query(
-      //         `SELECT handle, name FROM companies
-      //          WHERE name = $1 `,
-      //         [filter])
-      // } else if (term === min_employee) {
-      //     result = await db.query(
-      //         `SELECT titles, handle FROM companies
-      //          JOIN jobs ON companies.handle = jobs.company_handle
-      //          WHERE companies.num_employees > $1 `,
-      //         [filter])
-      // } else if (term === max_employee) {
-      //     result = await db.query(
-      //         `SELECT titles, handle FROM companies
-      //          JOIN jobs ON companies.handle = jobs.company_handle
-      //          WHERE companies.num_employees < $1 `,
-      //         [filter])
-      // }
-      // } else {
-      //     result = await db.query(
-      //         `SELECT handle, name FROM companies`
-      //     );
-      // }
-
-
+      if (queryObj.search && queryObj.min && queryObj.max) {
+        result = await db.query(
+          `SELECT name, handle FROM companies
+           JOIN jobs  
+           WHERE num_employees > $1 
+           AND num_employees < $2
+            AND name = $3`, [min, max, name]);
+      } else {
+        result = await db.query(
+          `SELECT handle, name FROM companies`
+        );
+      }
 
       let companies = result.rows;
       return companies;
@@ -101,21 +78,21 @@ class Companies {
       RETURNING handle, name, num_employees, description, logo_url`, [name, num_employees, description, logo_url, id]
     );
 
-    if(!result.rows[0]){
+    if (!result.rows[0]) {
       throw new ExpressError(`No such company found: ${id}`, 404);
     }
 
     return result.rows[0];
   }
 
-  static async deleteCompany (id){
+  static async deleteCompany(id) {
     const result = await db.query(
       `DELETE FROM companies
       WHERE handle = $1
       RETURNING name`, [id]
     );
 
-    if(!result.rows[0]){
+    if (!result.rows[0]) {
       throw new ExpressError(`No such company found: ${id}`, 404);
     }
 

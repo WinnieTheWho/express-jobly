@@ -8,19 +8,19 @@ const router = new Router();
 router.get("/", async function (req, res, next) {
   try {
     let companies;
-    console.log("REQUEST.QUERY:", req.query);
-
     if (req.query) {
-      companies = await Companies.getAllCompanies(req.query);
+      companies = await Companies.getAllCompanies(req.query)
+      return res.json({ companies });
     }
-
-    companies = await Companies.getAllCompanies();
-    return res.json({ companies });
+    else {
+      companies = await Companies.getAllCompanies();
+      return res.json({ companies });
+    }
   }
   catch (err) {
-    return next(err);
-  }
-});
+      return next(err);
+    }
+  });
 
 router.post("/", async function (req, res, next) {
   try {
@@ -66,7 +66,7 @@ router.delete("/:id", async function (req, res, next) {
 
     const message = `${company} was removed`
 
-    return res.json({message})
+    return res.json({ message })
   }
   catch (err) {
     return next(err);
