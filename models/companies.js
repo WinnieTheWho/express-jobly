@@ -85,12 +85,13 @@ class Companies {
     return company;
   }
 
-  static async updateCompany(id, name, num_employees, description, logo_url) {
+  static async updateCompany({ id, name, num_employees, description, logo_url }) {
     const result = await db.query(
       `UPDATE companies
       SET name = $1, num_employees = $2, description = $3, logo_url = $4 
       WHERE handle = $5
-      RETURNING handle, name, num_employees, description, logo_url`, [name, num_employees, description, logo_url, id]
+      RETURNING handle, name, num_employees, description, logo_url`, 
+      [name, num_employees, description, logo_url, id]
     );
 
     if (!result.rows[0]) {

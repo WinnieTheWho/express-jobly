@@ -63,7 +63,7 @@ router.patch("/:id", async function (req, res, next) {
   const { id } = req.params;
   const { name, num_employees, description, logo_url } = req.body.company;
   //TODO: MAKE INPUT INTO OBJECT 
-  const company = await Companies.updateCompany(id, name, num_employees, description, logo_url);
+  const company = await Companies.updateCompany({id, name, num_employees, description, logo_url});
 
   return res.json({ company })
 
