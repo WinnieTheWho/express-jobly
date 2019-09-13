@@ -3,14 +3,14 @@ const { Router } = express;
 const jsonschema = require("jsonschema");
 const ExpressError = require("../helpers/expressError");
 const Jobs = require("../models/jobs");
-const companySchema = require("../schemas/companiesSchema");
+const jobsSchema = require("../schemas/jobsSchema");
 
 const router = new Router();
 
 
 /** POST / => post new job to jobs table*/
 router.post("/", async function (req, res, next) {
-  const result = jsonschema.validate(req.body, companySchema);
+  const result = jsonschema.validate(req.body, jobsSchema);
 
   if (!result.valid) {
     let listOfErrors = result.errors.map(error => error.stack);
@@ -18,8 +18,8 @@ router.post("/", async function (req, res, next) {
     return next(error);
   }
 
-  const { title, salary, equity, company_handle, date_posted } = req.body
-  const job = await Jobs.createJob(req.body.jobs);
+  const data = req.body.job
+  const job = await Jobs.createJob(data);
 
   return res.json({ job }, 201);
 });
@@ -49,7 +49,7 @@ router.get("/:id", async function (req, res, next) {
 
 /** PATCH /:id => update details of one job */
 router.patch("/:id", async function(req, res, next){
-  const result = jsonschema.validate(req.body, companySchema);
+  const result = jsonschema.validate(req.body, jobsSchema);
 
   if (!result.valid) {
     let listOfErrors = result.errors.map(error => error.stack);
