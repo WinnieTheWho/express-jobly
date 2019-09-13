@@ -7,7 +7,7 @@ const ExpressError = require("../helpers/expressError");
 /** companies */
 
 class Companies {
-
+  
   static async getAllCompanies(queryDataObj) {
     let querySearch = `SELECT handle, name FROM companies`;
     let min = Number(queryDataObj.min_employees);
@@ -82,6 +82,16 @@ class Companies {
     if (!company) {
       throw new ExpressError(`No such company found: ${handle}`, 404);
     }
+
+    const jobs = await db.query(
+      `SELECT id, title, salary, equity
+            FROM jobs 
+            WHERE company_handle = $1`,
+      [handle]
+    );
+
+    company.jobs = jobs.rows;
+
     return company;
   }
 
