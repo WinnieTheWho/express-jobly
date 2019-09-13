@@ -1,74 +1,82 @@
 {
-    "definitions": {},
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "http://example.com/root.json",
-    "type": "object",
-    "title": "The Root Schema",
-    "required": [
-      "job"
-    ],
-    "properties": {
-      "job": {
-        "$id": "#/properties/job",
-        "type": "object",
-        "title": "The Job Schema",
-        "required": [
-          "title",
-          "salary",
-          "equity",
-          "company_handle",
-          "date_posted"
-        ],
-        "properties": {
-          "title": {
-            "$id": "#/properties/job/properties/title",
-            "type": "string",
-            "title": "The Title Schema",
-            "default": "",
-            "examples": [
-              "popcorn maker"
-            ],
-            "pattern": "^(.*)$"
-          },
-          "salary": {
-            "$id": "#/properties/job/properties/salary",
-            "type": "integer",
-            "title": "The Salary Schema",
-            "default": 0,
-            "examples": [
-              8
-            ]
-          },
-          "equity": {
-            "$id": "#/properties/job/properties/equity",
-            "type": "number",
-            "title": "The Equity Schema",
-            "default": 0.0,
-            "examples": [
-              0.3
-            ]
-          },
-          "company_handle": {
-            "$id": "#/properties/job/properties/company_handle",
-            "type": "string",
-            "title": "The Company_handle Schema",
-            "default": "",
-            "examples": [
-              "whisk"
-            ],
-            "pattern": "^(.*)$"
-          },
-          "date_posted": {
-            "$id": "#/properties/job/properties/date_posted",
-            "type": "string",
-            "title": "The Date_posted Schema",
-            "default": "",
-            "examples": [
-              "2019-09-12T23:38:36.448Z"
-            ],
-            "pattern": "^(.*)$"
-          }
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "job"
+  ],
+  "properties": {
+    "job": {
+      "$id": "#/properties/job",
+      "type": "object",
+      "title": "The Job Schema",
+      "required": [
+        "title",
+        "salary",
+        "equity",
+        "company_handle"
+      ],
+      "properties": {
+        "id": {
+          "$id": "#/properties/job/properties/id",
+          "type": "integer",
+          "title": "The Id Schema",
+          "default": 0,
+          "examples": [
+            13
+          ]
+        },
+        "title": {
+          "$id": "#/properties/job/properties/title",
+          "type": "string",
+          "title": "The Title Schema",
+          "default": "",
+          "examples": [
+            "popcorn maker"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "salary": {
+          "$id": "#/properties/job/properties/salary",
+          "type": "integer",
+          "title": "The Salary Schema",
+          "default": 0,
+          "examples": [
+            8
+          ]
+        },
+        "equity": {
+          "$id": "#/properties/job/properties/equity",
+          "type": "number",
+          "title": "The Equity Schema",
+          "default": 0.0,
+          "examples": [
+            0.3
+          ]
+        },
+        "company_handle": {
+          "$id": "#/properties/job/properties/company_handle",
+          "type": "string",
+          "title": "The Company_handle Schema",
+          "default": "",
+          "examples": [
+            "whisk"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "date_posted": {
+          "$id": "#/properties/job/properties/date_posted",
+          "type": "string",
+          "title": "The Date_posted Schema",
+          "default": "",
+          "examples": [
+            "2019-09-12T23:20:50.641Z"
+          ],
+          "pattern": "^(.*)$"
         }
       }
     }
   }
+}
