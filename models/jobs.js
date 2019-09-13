@@ -15,7 +15,7 @@ class Jobs {
         date_posted
       )
       VALUES ($1, $2, $3, $4, current_timestamp)
-      RETURNING title, salary, equity, company_handle, date_posted`,
+      RETURNING id, title, salary, equity, company_handle, date_posted`,
       [title, salary, equity, company_handle]
     );
 
@@ -23,77 +23,82 @@ class Jobs {
   }
 
   static async getJobs(queryDataObj) {
-    let querySearch = `SELECT title, company_handle FROM jobs`;
+    let baseQ = `SELECT title, company_handle FROM jobs`;
     let order = ` ORDER BY date_posted DESC`;
+    let searchQ = [];
+    let values = [];
     let minSalary = queryDataObj.min_salary;
     let minEquity = queryDataObj.min_equity;
     let search = queryDataObj.search;
-    let values = [];
 
     //If query data has values => filter search 
     if (queryDataObj) {
 
       if (minSalary) {
         values.push(minSalary);
-        querySearch += ` WHERE salary >= $1`;
+        searchQ.push(` salary >= $${values.length}`);
       }
 
       if (minEquity) {
         values.push(minEquity);
-        if (values.length === 1) {
-          querySearch += ` WHERE equity >= $1`
-        }
-        querySearch += ` AND equity >= $${values.length}`;
+        searchQ.push(` equity >= $${values.length}`);
       }
 
       if (search) {
         values.push(search);
-        if (values.length === 1) {
-          querySearch += ` WHERE company_handle LIKE $1`
-        }
-        querySearch += ` AND company_handle LIKE $${values.length}`;
+        searchQ.push(` company_handle LIKE $${values.length}`);
       }
 
-      let resultQuery = querySearch + order;
-      const result = await db.query(resultQuery, values);
+      if (searchQ.length > 0) {
+        baseQ += ' WHERE'
+      }
+
+      let querySearch = baseQ + searchQ.join(" AND") + order
+      const result = await db.query(querySearch, values);
+
+      if (result.rowCount === 0) {
+        throw new ExpressError(`No matches found`, 404);
+      };
+
       return result.rows;
 
     }
+
     // If no query data => return all  
     else {
 
       let resultQuery = querySearch + order;
-      const result = await db.query(querySeaerch);
+      const result = await db.query(resultQuery);
       return result.rows;
     }
   }
 
-  static async getJob(id){
+  static async getJob(id) {
     const result = await db.query(
       `SELECT * FROM jobs
-       WHERE id = $1`, 
-       [id]
+       WHERE id = $1`,
+      [id]
     )
 
     let job = result.rows[0];
 
     if (!job) {
-      throw new ExpressError(`No job with id:${ id} found`, 404);
+      throw new ExpressError(`No job with id:${id} found`, 404);
     };
 
     return job;
   }
 
-  static async updateJob({id, title, salary, equity, company_handle}) {
+  static async updateJob({ id, title, salary, equity, company_handle }) {
     const result = await db.query(
       `UPDATE jobs 
        SET title = $1, salary = $2, equity = $3, 
                    company_handle = $4, date_posted = current_timestamp 
        WHERE id = $5 
-       RETURNING id, title, salary, equity, company_handle, date_posted`, 
-       [title, salary, equity, company_handle, id]
+       RETURNING id, title, salary, equity, company_handle, date_posted`,
+      [title, salary, equity, company_handle, id]
     );
-    
+
     if (!result.rows[0]) {
       throw new ExpressError(`No job with id:${id} found`, 404);
     };
@@ -101,14 +106,14 @@ class Jobs {
     return result.rows[0];
   }
 
-  static async deleteJob(id){
+  static async deleteJob(id) {
     const result = await db.query(
       `DELETE from jobs 
        WHERE id = $1
-       RETURNING title`, 
-       [id]
+       RETURNING title`,
+      [id]
     );
-    
+
     if (!result.rows[0]) {
       throw new ExpressError(`No job with id:${id} found`, 404);
     }
@@ -116,7 +121,6 @@ class Jobs {
     return result.rows[0].title;
 
   }
-
 
 }
 
